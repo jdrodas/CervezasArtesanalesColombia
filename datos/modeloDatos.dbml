@@ -1,0 +1,105 @@
+// Script de clase - Junio 9 de 2023
+// Curso de Topicos Avanzados de Base de datos
+// Juan Dario Rodas - juand.rodasm@upb.edu.co
+
+// Proyecto: Cervezas Artesanales Colombia
+
+// Modelo de datos utilizando DBML
+
+table cervecerias {
+  id int [pk, increment]
+  nombre varchar
+  ubicacion varchar
+  sitioWeb varchar
+  instagram varchar
+}
+
+table cervezas {
+  id int [pk, increment]
+  nombre varchar
+  cerveceriaId int
+  estiloId int
+  ibu float
+  rangoIbuId int
+  abv float
+  rangoAbvId int
+}
+
+Ref:cervecerias.id < cervezas.cerveceriaId
+
+table estilos {
+  id int [pk, increment]
+  nombre varchar
+}
+
+Ref:estilos.id - cervezas.estiloId
+
+table rangosIbu {
+  id int [pk, increment]
+  nombre varchar
+  valorInicial float
+  valorFinal float
+}
+
+Ref:rangosIbu.id < cervezas.rangoIbuId
+
+table rangosAbv {
+  id int [pk, increment]
+  nombre varchar
+  valorInicial float
+  valorFinal float
+}
+
+Ref:rangosAbv.id < cervezas.rangoAbvId
+
+table ingredientes {
+  id int [pk, increment]
+  tipoIngredienteId int
+  nombre varchar
+}
+
+table tiposIngredientes {
+  id int [pk, increment]
+  nombre varchar
+}
+
+Ref:tiposIngredientes.id - ingredientes.tipoIngredienteId
+
+table ingredientesCervezas {
+  cervezaId int
+  ingredienteId int
+
+  Indexes {
+    (cervezaId, ingredienteId) [pk]
+  }
+}
+
+Ref:cervezas.id < ingredientesCervezas.cervezaId
+Ref:ingredientes.id < ingredientesCervezas.ingredienteId
+
+table envasados {
+  id int [pk, increment]
+  nombre varchar
+  volumen int
+  unidadVolumenId int
+}
+
+table unidadesVolumen {
+  id int [pk, increment]
+  nombre varchar
+  descripcion varchar
+}
+
+Ref:unidadesVolumen.id < envasados.unidadVolumenId
+
+table envasadosCervezas {
+  cervezaId int
+  envasadoId int
+
+  Indexes {
+    (cervezaId, envasadoId) [pk]
+  }
+}
+
+Ref:cervezas.id < envasadosCervezas.cervezaId
+Ref:envasados.id < envasadosCervezas.envasadoId
