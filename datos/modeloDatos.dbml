@@ -6,12 +6,39 @@
 
 // Modelo de datos utilizando DBML
 
+table ubicaciones{
+  id int [pk, increment]
+  municipio varchar
+  departamento varchar
+}
+
 table cervecerias {
   id int [pk, increment]
   nombre varchar
-  ubicacion varchar
+  ubicacionId int
   sitioWeb varchar
   instagram varchar
+}
+
+Ref:ubicaciones.id - cervecerias.ubicacionId
+
+table estilos {
+  id int [pk, increment]
+  nombre varchar
+}
+
+table rangosAbv {
+  id int [pk, increment]
+  nombre varchar
+  valorInicial float
+  valorFinal float
+}
+
+table rangosIbu {
+  id int [pk, increment]
+  nombre varchar
+  valorInicial float
+  valorFinal float
 }
 
 table cervezas {
@@ -26,30 +53,8 @@ table cervezas {
 }
 
 Ref:cervecerias.id < cervezas.cerveceriaId
-
-table estilos {
-  id int [pk, increment]
-  nombre varchar
-}
-
 Ref:estilos.id - cervezas.estiloId
-
-table rangosIbu {
-  id int [pk, increment]
-  nombre varchar
-  valorInicial float
-  valorFinal float
-}
-
 Ref:rangosIbu.id < cervezas.rangoIbuId
-
-table rangosAbv {
-  id int [pk, increment]
-  nombre varchar
-  valorInicial float
-  valorFinal float
-}
-
 Ref:rangosAbv.id < cervezas.rangoAbvId
 
 table ingredientes {
@@ -77,6 +82,7 @@ table ingredientesCervezas {
 Ref:cervezas.id < ingredientesCervezas.cervezaId
 Ref:ingredientes.id < ingredientesCervezas.ingredienteId
 
+
 table envasados {
   id int [pk, increment]
   nombre varchar
@@ -91,6 +97,7 @@ table unidadesVolumen {
 }
 
 Ref:unidadesVolumen.id < envasados.unidadVolumenId
+
 
 table envasadosCervezas {
   cervezaId int
