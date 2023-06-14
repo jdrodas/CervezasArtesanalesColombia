@@ -130,9 +130,9 @@ create table cervezas
 	cerveceriaId int not null,
 	estiloId int not null,
 	ibu float default 0 not null,
-	rangoIbuId float default 1 not null,
+	rangoIbuId id default 1 not null,
 	abv float default 0 not null,
-	rangoAbvId float default 1 not null,
+	rangoAbvId id default 1 not null,
 
 	constraint cervezas_pk primary key (id) enable
 );

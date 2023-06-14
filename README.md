@@ -13,6 +13,11 @@ Por favor tenga presente:
 - Puede clonar el repositorio e inclusive proponer mejoras a través de issues, pero no necesariamente serán implementadas en el tiempo asignado para el curso. Siempre será un trabajo en constante modificación
 
 
+## API
+### [API_SQLite_Dapper](https://github.com/jdrodas/CervezasArtesanalesColombia/tree/main/API_SQLite_Dapper)
+- WebAPI en .NET 7.x implementando *Patrón Repositorio* con capa de persistencia de datos en SQLite a través de Dapper
+
+
 # Craft Beers Colombia
 
 Apps using .NET framework to demo database connectivity using SQLite, PostgreSQL and MongoDB.
@@ -25,3 +30,6 @@ Please keep in mind:
 
 - You can clone the repository and even propose improvements through github issues, but they will not necessarily be implemented in the time allotted for the course. It will always be a Work in progress.
 
+## API
+### [API_SQLite_Dapper](https://github.com/jdrodas/CervezasArtesanalesColombia/tree/main/API_SQLite_Dapper)
+- .NET 7.x WebAPI implementing *Repository Pattern* with infrastructure persistence layer in SQLite using Dapper
