@@ -57,14 +57,14 @@ Ref:estilos.id - cervezas.estiloId
 Ref:rangosIbu.id < cervezas.rangoIbuId
 Ref:rangosAbv.id < cervezas.rangoAbvId
 
-table ingredientes {
+table tiposIngredientes {
   id int [pk, increment]
-  tipoIngredienteId int
   nombre varchar
 }
 
-table tiposIngredientes {
+table ingredientes {
   id int [pk, increment]
+  tipoIngredienteId int
   nombre varchar
 }
 
@@ -82,18 +82,16 @@ table ingredientesCervezas {
 Ref:cervezas.id < ingredientesCervezas.cervezaId
 Ref:ingredientes.id < ingredientesCervezas.ingredienteId
 
+table unidadesVolumen {
+  id int [pk, increment]
+  nombre varchar
+}
 
 table envasados {
   id int [pk, increment]
   nombre varchar
   volumen int
   unidadVolumenId int
-}
-
-table unidadesVolumen {
-  id int [pk, increment]
-  nombre varchar
-  descripcion varchar
 }
 
 Ref:unidadesVolumen.id < envasados.unidadVolumenId
