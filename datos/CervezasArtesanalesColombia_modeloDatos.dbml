@@ -85,26 +85,21 @@ Ref:ingredientes.id < ingredientesCervezas.ingredienteId
 table unidadesVolumen {
   id int [pk, increment]
   nombre varchar
+  abreviatura varchar
 }
 
 table envasados {
   id int [pk, increment]
   nombre varchar
-  volumen int
-  unidadVolumenId int
 }
-
-Ref:unidadesVolumen.id < envasados.unidadVolumenId
-
 
 table envasadosCervezas {
   cervezaId int
   envasadoId int
-
-  Indexes {
-    (cervezaId, envasadoId) [pk]
-  }
+  unidadVolumenId int
+  volumen int
 }
 
+Ref:unidadesVolumen.id < envasadosCervezas.unidadVolumenId
 Ref:cervezas.id < envasadosCervezas.cervezaId
 Ref:envasados.id < envasadosCervezas.envasadoId

@@ -253,35 +253,31 @@ comment on column unidadesVolumen.abreviatura is 'abreviatura de la unidad de vo
 create table envasados(
     id int generated always as identity not null,
     nombre varchar2(50) not null,
-    volumen int not null,
-    unidadVolumenId int not null,
-    
+
     constraint envasados_pk primary key (id) enable	    
 );
-
-alter table envasados 
-    add constraint envasados_unidadesVolumen_fk foreign key (unidadVolumenId)
-    references unidadesVolumen (id) enable;
 
 comment on table envasados is 'Envasados - Packaging'; 
 comment on column envasados.id is 'Id del evasado'; 
 comment on column envasados.nombre is 'Nombre del envasado';
-comment on column envasados.volumen is 'cantidad de unidades de volumen';
-comment on column envasados.unidadVolumenId is 'Id de la unidad de volumen';
 
--- Tabla IngredientesCervezas
+-- Tabla EnvasadosCervezas
 create table envasadosCervezas
 (
     cervezaId int not null,
     envasadoId int not null,
+	unidadVolumenId int not null,
+	volumen int not null
     
     constraint envasadosCervezas_pk primary key
     (cervezaId, envasadoId) enable
 );
 
-Comment on table envasadosCervezas is 'Envasados por cerveza - Beer Packaging';
+comment on table envasadosCervezas is 'Envasados por cerveza - Beer Packaging';
 comment on column envasadosCervezas.cervezaId is 'Id de la cerveza';
 comment on column envasadosCervezas.envasadoId is 'Id del envasado';
+comment on column envasadosCervezas.unidadVolumenId is 'Id de la unidad del volumen';
+comment on column envasadosCervezas.volumen is 'Volumen del envasado';
 
 alter table envasadosCervezas
     add constraint envasadosCervezas_cervezas_fk foreign key (cervezaId)
@@ -291,7 +287,9 @@ alter table envasadosCervezas
     add constraint ienvasadosCervezas_envasados_fk foreign key (envasadoId)
     references envasados (id) enable;
 
-
+alter table envasadosCervezas
+    add constraint ienvasadosCervezas_unidadesVolumen_fk foreign key (unidadVolumenId)
+    references unidadesVolumen (id) enable;
 
 -- ****************************************************
 -- Actualización de Rangos Abv y Ibu para las cervezas
