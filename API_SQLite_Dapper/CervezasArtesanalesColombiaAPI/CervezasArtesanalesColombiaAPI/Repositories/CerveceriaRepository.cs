@@ -3,7 +3,6 @@ using CervezasArtesanalesColombiaAPI.Data.DbContexts;
 using CervezasArtesanalesColombiaAPI.Data.Entities;
 using CervezasArtesanalesColombiaAPI.Interfaces;
 using System.Data;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CervezasArtesanalesColombiaAPI.Repositories
 {
@@ -26,7 +25,7 @@ namespace CervezasArtesanalesColombiaAPI.Repositories
                     "(u.municipio || ', ' || u.departamento) ubicacion, " +
                     "c.sitioWeb, " +
                     "c.instagram " +
-                    "FROM cervecerias c join ubicaciones u on c.ubicacionId = u.id " +
+                    "FROM cervecerias c JOIN ubicaciones u ON c.ubicacionId = u.id " +
                     "ORDER BY c.nombre;";
 
                 var resultadoCervecerias = await contextoDB.Conexion.QueryAsync<Cerveceria>(sentenciaSQL, new DynamicParameters());
@@ -51,7 +50,7 @@ namespace CervezasArtesanalesColombiaAPI.Repositories
                     "(u.municipio || ', ' || u.departamento) ubicacion, " +
                     "c.sitioWeb, " +
                     "c.instagram " +
-                    "FROM cervecerias c join ubicaciones u on c.ubicacionId = u.id " +
+                    "FROM cervecerias c JOIN ubicaciones u ON c.ubicacionId = u.id " +
                     "WHERE c.id = @id_cerveceria " +
                     "ORDER BY c.nombre;";
 

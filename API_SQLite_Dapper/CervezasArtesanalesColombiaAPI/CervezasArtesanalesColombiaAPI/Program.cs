@@ -12,9 +12,11 @@ builder.Services.AddSingleton<SQLiteDbContext>();
 
 //Los repositorios
 builder.Services.AddScoped<ICerveceriaRepository, CerveceriaRepository>();
+builder.Services.AddScoped<IIngredienteRepository, IngredienteRepository>();
 
 //Aqui agregamos los servicios asociados para cada EndPoint
 builder.Services.AddScoped<CerveceriaService>();
+builder.Services.AddScoped<IngredienteService>();
 
 // Agregamos Servicios al Controlador, especificando las opciones para el manejo de Json
 builder.Services.AddControllers()
