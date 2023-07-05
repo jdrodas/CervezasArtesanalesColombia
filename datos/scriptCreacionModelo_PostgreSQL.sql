@@ -3,35 +3,35 @@
 -- Juan Dario Rodas - juand.rodasm@upb.edu.co
 
 --Proyecto: Cervezas Artesanales de Colombia
--- Motor de Base de datos: Oracle XE 21C
+-- Motor de Base de datos: PostgreSQL 15.x
 
--- Creamos el esquema/usuario CervezasColombia
+-- Con usuario Root:
 
--- Con el usuario system
+-- crear el esquema la base de datos
+create database cervezas_db;
 
--- Importante: Tener presente en que contenedor estás ubicado
-alter session set container=xepdb1;
+-- crear el usuario con el que se realizarán las acciones
+create user cervezas_usr with encrypted password 'unaClav3';
 
--- USER SQL
-CREATE USER "CERVEZAS_DB" IDENTIFIED BY "unaclav3"  
-DEFAULT TABLESPACE "USERS"
-TEMPORARY TABLESPACE "TEMP";
+-- asignación de privilegios para el usuario
+grant all privileges on database cervezas_db to cervezas_usr;
 
--- QUOTAS
-ALTER USER "CERVEZAS_DB" QUOTA UNLIMITED ON "USERS";
+-- A partir de PostgreSQL 15.x, explicitamente asignar privilegios al schema public
+grant all on schema public to cervezas_usr;
 
--- ROLES
-GRANT "CONNECT" TO "CERVEZAS_DB" ;
-GRANT "RESOURCE" TO "CERVEZAS_DB" ;
+-- ********** --
+-- IMPORTANTE --
+-- ********** --
+-- Pésima práctica de seguridad asignarle TODOS los privilegios
+-- Si haces "grant all", estás haciendo algo muuuuy malo
 
--- SYSTEM PRIVILEGES
-GRANT CREATE VIEW TO "CERVEZAS_DB" ;
-GRANT CREATE SESSION TO "CERVEZAS_DB" ;
-GRANT CREATE TABLE TO "CERVEZAS_DB" ;
-GRANT CREATE SYNONYM TO "CERVEZAS_DB" ;
-GRANT CREATE SEQUENCE TO "CERVEZAS_DB" ;
+-- ==============================================================
+-- Coloca en este espacio cual es la solución a este problema
+-- basado en lo que estaremos haciendo en el ejercicio
 
--- Con el usuario/esquema CERVEZAS_DB
+-- ==============================================================
+
+-- Con el esquema/usuario: cervezas_db / cervezas_usr
 
 -- *******************************
 -- Creacion de tablas
@@ -40,30 +40,31 @@ GRANT CREATE SEQUENCE TO "CERVEZAS_DB" ;
 -- Tabla Ubicaciones
 create table ubicaciones
 (
-	id int generated always as identity not null,
-	municipio varchar2(50) not null,
-    departamento varchar2(50) not null,
-	
-	constraint ubicaciones_pk primary key (id) enable	
+    id  integer generated always as identity
+        constraint ubicaciones_pk primary key,
+    municipio    varchar(50) not null,
+    departamento varchar(50) not null,
+
+    constraint ubicaciones_uk
+        unique (municipio, departamento)
 );
 
-alter table ubicaciones add constraint ubicaciones_uk unique (municipio,departamento);
-
-comment on table ubicaciones is 'Ubicaciones - Locations'; 
-comment on column ubicaciones.id is 'Id de la ubicación'; 
-comment on column ubicaciones.municipio is 'Nombre del municipio'; 
+comment on table ubicaciones is 'Ubicaciones - Locations';
+comment on column ubicaciones.id is 'Id de la ubicación';
+comment on column ubicaciones.municipio is 'Nombre del municipio';
 comment on column ubicaciones.departamento is 'Nombre del departamento'; 
+
 
 -- Tabla Cervecerias
 create table cervecerias
 (
-	id int generated always as identity not null,
-	nombre varchar2(100) not null,
-	ubicacionId int not null,
-	sitioWeb varchar2(200) not null,
-	instagram varchar2(50) not null,
-	
-	constraint cervecerias_pk primary key (id) enable
+    id  integer generated always as identity
+        constraint cervecerias_pk primary key,
+	nombre      varchar(100) not null,
+	ubicacionId integer not null
+        constraint cervecerias_ubicaciones_fk references ubicaciones,    
+	sitioWeb    varchar(200) not null,
+	instagram   varchar(50) not null	
 );
 
 comment on table cervecerias is 'Cervecerias - Breweries'; 
@@ -73,20 +74,15 @@ comment on column cervecerias.ubicacionId is 'Id de la Ubicacion de la cerveceri
 comment on column cervecerias.sitioWeb is 'Sitio Web de la cerveceria'; 
 comment on column cervecerias.instagram is 'Cuenta de instagram de la cerveceria'; 
 
-alter table cervecerias
- add constraint cervecerias_ubicaciones_fk foreign key (ubicacionId)
-	references ubicaciones (id) enable;
-
 -- Tabla Estilos
 create table estilos
 (
-	id int generated always as identity not null,
-	nombre varchar2(50) not null,
-	
-	constraint estilos_pk primary key (id) enable	
-);
+    id  integer generated always as identity
+        constraint estilos_pk primary key,
+    nombre    varchar(50) not null,
 
-alter table estilos add constraint estilos_nombre_uk unique (nombre);
+    constraint estilos_uk unique (nombre)	
+);
 
 comment on table estilos is 'Estilos - Styles'; 
 comment on column estilos.id is 'Id del estilo'; 
@@ -95,12 +91,13 @@ comment on column estilos.nombre is 'Nombre del estilo';
 -- Tabla RangosAbv
 create table rangosAbv
 (
-	id int generated always as identity not null,
-	nombre varchar2(100) not null,
+    id  integer generated always as identity
+        constraint rangosAbv_pk primary key,
+	nombre varchar(100) not null,
 	valorInicial float not null,
 	valorFinal  float not null,
 	
-	constraint rangosAbv_pk primary key (id) enable
+    constraint rangosAbv_uk unique (nombre)
 );
 
 comment on table rangosAbv is 'Rangos Alcohol por Volumen - Alcohol by Volume Ranges'; 
@@ -112,12 +109,13 @@ comment on column rangosAbv.valorFinal is 'Valor final del rango';
 -- Tabla RangosIbu
 create table rangosIbu
 (
-	id int generated always as identity not null,
-	nombre varchar2(100) not null,
+    id  integer generated always as identity
+        constraint rangosIbu_pk primary key,
+	nombre varchar(100) not null,
 	valorInicial float not null,
 	valorFinal  float not null,
 	
-	constraint rangosIbu_pk primary key (id) enable
+    constraint rangosIbu_uk unique (nombre)
 );
 
 comment on table rangosIbu is 'Rangos de Unidades Internacionales de Amargor - International Bitterness Units Ranges'; 
@@ -129,16 +127,15 @@ comment on column rangosIbu.valorFinal is 'Valor final del rango';
 -- Tabla Cervezas
 create table cervezas
 (
-	id int generated always as identity not null,
-	nombre varchar2(100) not null,
+    id  integer generated always as identity
+        constraint cervezas_pk primary key,
+	nombre varchar(100) not null,
 	cerveceriaId int not null,
 	estiloId int not null,
 	ibu float default 0 not null,
 	rangoIbuId int default 1 not null,
 	abv float default 0 not null,
-	rangoAbvId int default 1 not null,
-
-	constraint cervezas_pk primary key (id) enable
+	rangoAbvId int default 1 not null
 );
 
 comment on table cervezas is 'Cervezas - Beers'; 
@@ -152,37 +149,41 @@ comment on column cervezas.abv is 'Valor del porcentaje de alcohol';
 comment on column cervezas.rangoAbvId is 'Id del Rango del porcentaje de alcohol';
 
 
-alter table cervezas 
-	add constraint cervezas_abv_chk check
-		(abv between 0 and 12) enable;	 
+alter table cervezas
+    add constraint cervezas_abv_chk
+        check (abv between 0 and 12);	 
 
 alter table cervezas 
-	add constraint cervezas_ibu_chk check
-		(ibu between 0 and 100) enable;		
+	add constraint cervezas_ibu_chk 
+        check (ibu between 0 and 100);		
 
 alter table cervezas
-	add constraint cervezas_cervecerias_fk foreign key (cerveceriaId)
-	references cervecerias (id) enable;		
+    add constraint cervezas_cervecerias_fk
+        foreign key (cerveceriaid) references cervecerias;
 
 alter table cervezas
 	add constraint cervezas_rangosAbv_fk foreign key (rangoAbvId)
-	references rangosAbv (id) enable;
+	references rangosAbv (id);
 
 alter table cervezas
 	add constraint cervezas_rangosIbu_fk foreign key (rangoIbuId)
-	references rangosIbu (id) enable;
+	references rangosIbu (id);
 
 alter table cervezas
 	add constraint cervezas_estilos_fk foreign key (estiloId)
-	references estilos (id) enable;
+	references estilos (id);
 
--- Tabla TiposIngredientes
+
+
+    -- Tabla TiposIngredientes
 create table tiposIngredientes
 (
-	id int generated always as identity not null,
-	nombre varchar2(50) not null,
+	    id  integer generated always as identity
+        constraint tiposIngredientes_pk primary key,
+	nombre varchar(50) not null,
+
+    constraint tiposIngredientes_uk unique (nombre)
 	
-	constraint tiposIngredientes_pk primary key (id) enable	
 );
 
 alter table tiposIngredientes add constraint tiposIngredientes_nombre_uk unique (nombre);
@@ -194,11 +195,12 @@ comment on column tiposIngredientes.nombre is 'Nombre del tipo de ingredientes';
 -- Tabla Ingredientes
 create table ingredientes
 (
-	id int generated always as identity not null,
-	nombre varchar2(50) not null,
+	    id  integer generated always as identity
+        constraint ingredientes_pk primary key,
+	nombre varchar(50) not null,
 	tipoIngredienteId int not null,
 	
-	constraint ingredientes_pk primary key (id) enable	
+    constraint ingredientes_uk unique (nombre)
 );
 
 comment on table ingredientes is 'Ingredientes - Ingredients'; 
@@ -207,18 +209,18 @@ comment on column ingredientes.nombre is 'Nombre del ingredientes';
 comment on column ingredientes.tipoIngredienteId is 'Id del tipo de Ingrediente';
 
 alter table ingredientes
-	add constraint ingredientes_tiposIngredientes_fk foreign key (tipoIngredienteId)
-	references tiposIngredientes (id) enable;
+	add constraint ingredientes_tiposIngredientes_fk foreign key 
+    (tipoIngredienteId) references tiposIngredientes (id);
 
 -- Tabla IngredientesCervezas
 create table ingredientesCervezas
 (
     cervezaId int not null,
-    ingredienteId int not null,
-    
-    constraint ingredientesCervezas_pk primary key
-    (cervezaId, ingredienteId) enable
+    ingredienteId int not null
 );
+
+alter table ingredientesCervezas add constraint ingredientesCervezas_pk
+    primary key (cervezaId, ingredienteId);
 
 Comment on table ingredientesCervezas is 'Ingredientes por cerveza - Beer Ingredients';
 comment on column ingredientesCervezas.cervezaId is 'Id de la cerveza';
@@ -226,35 +228,33 @@ comment on column ingredientesCervezas.ingredienteId is 'Id del ingrediente';
 
 alter table ingredientesCervezas
     add constraint ingredientesCervezas_cervezas_fk foreign key (cervezaId)
-    references cervezas (id) enable;
+    references cervezas (id);
     
 alter table ingredientesCervezas
     add constraint ingredientesCervezas_ingredientes_fk foreign key (ingredienteId)
-    references ingredientes (id) enable;
+    references ingredientes (id);   
 
 -- Tabla UnidadesVolumen
 create table unidadesVolumen
 (
-	id int generated always as identity not null,
-	nombre varchar2(50) not null,
-	abreviatura varchar2(10) not null,
-    
-    constraint unidadesVolumen_pk primary key (id) enable	
+	    id  integer generated always as identity
+        constraint unidadesVolumen_pk primary key,
+	nombre varchar(50) not null,
+	abreviatura varchar(10) not null,
+
+    constraint unidadesVolumen_nombre_uk unique (nombre)	
 );
 
-alter table unidadesVolumen add constraint unidadesVolumen_nombre_uk unique (nombre);
-
-comment on table unidadesVolumen is 'Unidades de Volumen - Volume Units'; 
+Comment on table unidadesVolumen is 'Unidades de Volumen - Volume Units'; 
 comment on column unidadesVolumen.id is 'Id de unidad de volumen'; 
 comment on column unidadesVolumen.nombre is 'Nombre de la unidad de volumen';
 comment on column unidadesVolumen.abreviatura is 'abreviatura de la unidad de volumen';
 
 -- Tabla Envasados
 create table envasados(
-    id int generated always as identity not null,
-    nombre varchar2(50) not null,
-
-    constraint envasados_pk primary key (id) enable	    
+	    id  integer generated always as identity
+        constraint envasados_pk primary key,
+    nombre varchar(50) not null   
 );
 
 comment on table envasados is 'Envasados - Packaging'; 
@@ -268,10 +268,11 @@ create table envasadosCervezas
     envasadoId int not null,
 	unidadVolumenId int not null,
 	volumen int not null
-    
-    constraint envasadosCervezas_pk primary key
-    (cervezaId, envasadoId) enable
 );
+
+alter table envasadosCervezas add constraint envasadosCervezas_pk
+    primary key (cervezaId, envasadoId);
+
 
 comment on table envasadosCervezas is 'Envasados por cerveza - Beer Packaging';
 comment on column envasadosCervezas.cervezaId is 'Id de la cerveza';
@@ -281,35 +282,44 @@ comment on column envasadosCervezas.volumen is 'Volumen del envasado';
 
 alter table envasadosCervezas
     add constraint envasadosCervezas_cervezas_fk foreign key (cervezaId)
-    references cervezas (id) enable;
+    references cervezas (id);
     
 alter table envasadosCervezas
     add constraint ienvasadosCervezas_envasados_fk foreign key (envasadoId)
-    references envasados (id) enable;
+    references envasados (id);
 
 alter table envasadosCervezas
     add constraint ienvasadosCervezas_unidadesVolumen_fk foreign key (unidadVolumenId)
-    references unidadesVolumen (id) enable;
+    references unidadesVolumen (id);
 
 -- ****************************************************
--- Actualización de Rangos Abv y Ibu para las cervezas
+-- Script para ajustar datos
+-- Insertar datos de cervezas en tabla temporal cac_cervezas
 -- ****************************************************
 
--- Actualizacion Rango IBU
-update cervezas cv
-set rangoIbuId = 
-(select distinct id
- from rangosIbu ri where cv.ibu between ri.valorInicial and ri.valorFinal)
- where cv.rangoIbuId is not null;
-
-
--- Actualizacion Rango ABV
-update cervezas cv
-set rangoAbvId = 
-(select distinct id
- from rangosAbv ra where cv.abv between ra.valorInicial and ra.valorFinal)
- where cv.rangoAbvid is not null;
-
+insert into cervezas
+    (nombre,
+     cerveceriaid,
+     estiloid,
+     ibu,
+     rangoibuid,
+     abv,
+     rangoabvid)
+select distinct
+    cv.nombre,
+    c.id cerveceriaId,
+    e.id estiloId,
+    cv.ibu,
+    ibu.id rangoIbuId,
+    cv.abv,
+    abv.id rangoAbvId
+from cac_cervezas cv
+    join cervecerias c on cv.cerveceria = c.nombre
+    join estilos e on cv.estilo = e.nombre,
+    rangosabv abv,
+    rangosibu ibu
+where cv.ibu between ibu.valorinicial and ibu.valorfinal
+and cv.abv between abv.valorinicial and abv.valorfinal
 
 
 -- *****************************************
